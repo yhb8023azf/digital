@@ -5,73 +5,46 @@ const pool=require('../pool.js');
 //创建路由器
 const router=express.Router();
 
-//1.商品列表
-router.get('/list',function(req,res){
-	var obj=req.query;
-	    obj.pno=parseInt(obj.pno);
-		obj.pageSize=parseInt(obj.pageSize);
-	if (!obj.pno){
-		obj.pno=1;
-		return;
-	}
-	if (!obj.pageSize){
-		obj.pageSize=5;
-		return;
-	}
-	var start=(obj.pno-1)*obj.pageSize;
-	pool.query('SELECT * FROM xz_laptop LIMIT ?,?',[start,obj.pageSize],function(err,result){
-		if(err) throw err;
-		res.send(result);
-	});
-});
+// 笔记本电脑
 //2.商品详情
-router.get('/detail',function(req,res){
+router.get('/laptop',function(req,res){
 	var obj=req.query;
-	if (!obj.lid){
-		res.send({code:401,msg:'lid required'});
+	if (!obj.family_ids){
+		res.send({code:401,msg:'family_ids required'});
 		return;
 	}
-	pool.query('SELECT * FROM xz_laptop WHERE lid=?',[obj.lid],function(err,result){
+	pool.query('SELECT * FROM digital_laptop WHERE family_ids=?',[obj.family_ids],function(err,result){
 		if(err) throw err;
 		res.send(result);
 	});
 });
-//3.删除商品
-router.get('/delete',function(req,res){
+
+// 台式机/一体机
+router.get('/desktop',function(req,res){
 	var obj=req.query;
-	if (!obj.lid){
-		res.send({code:401,msg:'lid required'});
+	if (!obj.family_ids){
+		res.send({code:401,msg:'family_ids required'});
 		return;
 	}
-	pool.query('DELETE FROM xz_laptop WHERE lid=?',[obj.lid],function(err,result){
-		if (err) throw err;
-		if (result.affectedRows>0){
-			res.send({code:200,msg:'delete success'});
-		}else{
-			res.send({code:301,msg:'delete fail'});
-		}
+	pool.query('SELECT * FROM digital_desktop WHERE family_ids=?',[obj.did],function(err,result){
+		if(err) throw err;
+		res.send(result);
 	});
 });
-//4.商品添加
-router.get('/add',function(req,res){
+
+// 外设系列
+router.get('/preip',function(req,res){
 	var obj=req.query;
-	var i=400;
-	for (var key in obj){
-		i++;
-		if (!obj[key]){
-			res.send({code:i,msg:obj[key]+' required'});
-			return;
-		}
+	if (!obj.family_ids){
+		res.send({code:401,msg:'family_ids required'});
+		return;
 	}
-	pool.query('INSERT INTO xz_laptop SET ?',[obj],function(err,result){
-		if (err) throw err;
-		if (result.affectedRows>0){
-			res.send({code:200,msg:'add success'});
-		}else{
-			res.send({code:301,msg:'add fail'});
-		}
+	pool.query('SELECT * FROM digital_preip WHERE family_ids=?',[obj.pid],function(err,result){
+		if(err) throw err;
+		res.send(result);
 	});
 });
+
 
 //导出路由器
 module.exports=router;

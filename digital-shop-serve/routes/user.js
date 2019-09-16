@@ -2,6 +2,7 @@ const express=require("express");
 const router=express.Router();
 const pool=require("../pool");
 
+
 //添加路由
 //1.用户注册***************************************************************
 router.post('/reg',function(req,res){
@@ -41,27 +42,30 @@ router.post('/reg',function(req,res){
 });
 
 //2.用户登录**********************************************************************
-router.get('/login',function(req,res){
+router.get('/log',function(req,res){
   //2.1获取数据
   var obj=req.query;
   //2.2验证数据为空
-  if(!obj.uname){
-    res.send({code:401,msg:'uname required'});
+  if(!obj.phone){
+    res.send({code:401,msg:'phone required'});
 	return;
   }
   if(!obj.upwd){
-    res.send({code:402,msg:'upwd required'});
+    res.send({code:402,msg:'pwd required'});
 	return;
   }
   //2.3执行SQL语句
-  pool.query('SELECT * FROM digital_user WHERE uname=? AND upwd=?',[obj.uname,obj.upwd],function(err,result){
+  pool.query('SELECT uid FROM digital_user WHERE phone=? AND upwd=?',[obj.phone,obj.upwd],function(err,result){
     if(err) throw err;
-	console.log(result);
+    console.log(result)
 	//判断数据长度是否大于0
-	if(result.length>0){
-	  res.send({code:200,msg:'login success'});
+	if(result.length==0){
+	res.send({code:-1,msg:"用户名或密码有误"});
 	}else{
-	  res.send({code:301,msg:'login error'});
+	//1:将登录成功凭据保存session
+	req.session.uid = result[0].uid;
+	//2:将成功消息发送脚手架  
+	res.send({code:1,msg:"登录成功"})  
 	}
   });
 });
